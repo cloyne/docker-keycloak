@@ -1,0 +1,3 @@
+#!/bin/sh -e
+
+exec chpst -u rocketchat:rocketchat /usr/local/bin/node /Rocket.Chat/bundle/main.js 2>&1 >> /var/log/rocketchat/current

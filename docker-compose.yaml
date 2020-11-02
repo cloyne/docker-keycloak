@@ -1,0 +1,54 @@
+version: '2'
+services:
+  keycloak:
+    image: cloyne/keycloak 
+    #build: .
+    container_name: keycloak
+    networks:
+      server3:
+        ipv4_address: '172.25.0.2'
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+    volumes:
+      - /srv/log/keycloak:/var/log/keycloak
+    ports:
+      - "8080:8080"
+      - "443:443"
+    links:
+        - rocketchat:rocketchat
+
+  rocketchat:
+    image: cloyne/rocketchat
+    container_name: rocketchat
+    networks:
+      server3:
+        ipv4_address: '172.25.0.3'
+    environment:
+      MONGO_URL: mongodb://mongo://mongodb
+      ROOT_URL: https://localhost:3000 
+    volumes:
+      - /srv/log/rocketchat:/var/log/rocketchat
+    ports:
+      - "3000:3000"
+    links:
+        - mongo:mongo 
+
+  mongo:
+    image: cloyne/mongodb:3.6
+    container_name: mongo
+    networks:
+       server3:
+         ipv4_address: '172.25.0.4'
+    volumes:
+     - ./data/runtime/mongo:/data/db
+     - ./data/dump:/dump
+     - /srv/log/mongod:/var/log/mongod
+    command: mongod --smallfiles
+
+networks:
+  server3:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: '172.25.0.0/24'
